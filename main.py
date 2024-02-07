@@ -36,23 +36,40 @@ bfs_recursive(routes, deque(["A"]))
 print('\nDFS: ')
 dfs_recursive(routes, 'A')
 print('\n')
+
 #Завдання 3
-routes = {
-    'A': [('B', 1), ('C', 1)],
-    'B': [('A', 1), ('D', 1), ('E', 1)],
-    'C': [('A', 1), ('F', 1)],
-    'D': [('B', 1)],
-    'E': [('B', 1)],
-    'F': [('C', 1)]
-}
 for stop, connections in routes.items():
-    for connection, weight in connections:
-        G.add_edge(stop, connection, weight=weight)
+    for connection in connections:
+        G.add_edge(stop, connection, weight=1)
 
-source = 'E'
-target = 'D'
-shortest_path = nx.dijkstra_path(G, source, target, weight='weight')
-shortest_path_length = nx.dijkstra_path_length(G, source, target, weight='weight')
+def convert_graph_to_dict(graph):
+    graph_dict = {}
+    for node in graph.nodes():
+        graph_dict[node] = {}
+        for neighbor, attrs in graph[node].items():
+            graph_dict[node][neighbor] = attrs['weight']
+    return graph_dict
 
-print(f"Найкоротший шлях від {source} до {target}: {shortest_path}")
-print(f"Довжина найкоротшого шляху: {shortest_path_length}")
+graph_dict = convert_graph_to_dict(G)        
+
+def dijkstra(graph, start):
+    distances = {vertex: float('infinity') for vertex in graph}
+    previous_vertices = {vertex: None for vertex in graph}
+    distances[start] = 0
+    vertices = deque(graph)
+
+    while vertices:
+        current_vertex = min(vertices, key=lambda vertex: distances[vertex])
+        vertices.remove(current_vertex)
+
+        for neighbour, weight in graph[current_vertex].items():
+            alternative_route = distances[current_vertex] + weight
+           
+            if alternative_route < distances[neighbour]:
+                distances[neighbour] = alternative_route
+                previous_vertices[neighbour] = current_vertex
+
+    return distances, previous_vertices
+ 
+distances, _ = dijkstra(graph_dict, 'A')
+print(f'Відстань від А: {distances}')
